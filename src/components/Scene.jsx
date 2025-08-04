@@ -6,7 +6,7 @@ import { Box3, Vector3 } from 'three'
 
 
 
-export const Scene = ({  canvasRef, cylinderSettings, setCylinderSettings, mode }) => {
+export const Scene = ({  canvasRef, cylinderSettings, setCylinderSettings, mode, setLoading }) => {
   const { scene } = useGLTF('models/scene.gltf')
   const cylinderRef = useRef()
   const controlsRef = useRef()
@@ -18,45 +18,33 @@ export const Scene = ({  canvasRef, cylinderSettings, setCylinderSettings, mode 
 
   useEffect(() => {
     if (!scene) return
+    setLoading(false)
 
     scene.traverse((obj) => {
       if (obj.isMesh) {
         obj.castShadow = true
         obj.receiveShadow = true
-
-        if (obj.name === 'Cylinder_Curved') {
-
-          cylinderRef.current = obj
-
-          // Get cylinder dimensions
-          const box = new Box3().setFromObject(obj)
-          const size = new Vector3()
-          box.getSize(size)
-
-          setCylinderSettings({
-            posX: obj.position.x,
-            posY: obj.position.y,
-            posZ: obj.position.z,
-            height: size.y,
-            radius: size.x / 2
-          })
-
-        }
-
-        if (obj.name === 'Cylinder_Top') {
-          // Plain black material for the top
-          obj.material = new THREE.MeshStandardMaterial({
-            color: 0x000000,
-            roughness: 0.5,
-            metalness: 0,
-            side: THREE.DoubleSide
-          })
-        }
       }
     })
-
-
   }, [scene])
+
+  // Provide cylinder settings once the scene is loaded
+  useEffect(() => {
+    if (cylinderRef.current) {
+      const box = new Box3().setFromObject(cylinderRef.current)
+      const size = new Vector3()
+      box.getSize(size)
+
+      setCylinderSettings({
+        posX: cylinderRef.current.position.x,
+        posY: cylinderRef.current.position.y,
+        posZ: cylinderRef.current.position.z,
+        height: size.y,
+        radius: size.x / 2
+      })
+    }
+  }, [])
+
 
   // Apply dynamic canvas texture to cylinder
   useEffect(() => {
@@ -66,6 +54,11 @@ export const Scene = ({  canvasRef, cylinderSettings, setCylinderSettings, mode 
     if (!mesh || !canvas) return
 
     textureRef.current = new THREE.CanvasTexture(canvas)
+    textureRef.current.minFilter = THREE.LinearFilter;
+    textureRef.current.magFilter = THREE.LinearFilter;
+    textureRef.current.generateMipmaps = false;
+    textureRef.current.wrapS = THREE.ClampToEdgeWrapping
+    textureRef.current.wrapT = THREE.ClampToEdgeWrapping
     textureRef.current.needsUpdate = true
 
     if (mesh.material) {
@@ -84,7 +77,7 @@ export const Scene = ({  canvasRef, cylinderSettings, setCylinderSettings, mode 
 
     if (controlsRef.current && mesh) {
       controlsRef.current.target.copy(
-        new THREE.Vector3(mesh.position.x, mesh.position.y + cylinderSettings.height / 2, mesh.position.z)
+        new THREE.Vector3(mesh.position.x, mesh.position.y, mesh.position.z)
       )
       controlsRef.current.update()
     }
@@ -93,6 +86,43 @@ export const Scene = ({  canvasRef, cylinderSettings, setCylinderSettings, mode 
   return (
     <>
       <primitive object={scene} />
+
+      <mesh
+        ref={cylinderRef}
+        position={[0, 0.95, 0]}
+        castShadow
+        receiveShadow
+      >
+
+        {/* Cylinder geometry with dynamic texture */}
+        <cylinderGeometry
+          args={[
+            0.1, // radiusTop
+            0.1, // radiusBottom
+            0.3, // height
+            128, // radialSegments (smooth)
+            1,   // heightSegments
+            true // openEnded (no caps)
+          ]}
+        />
+        <meshStandardMaterial
+          map={textureRef.current}
+          side={THREE.DoubleSide}
+          roughness={0.3}
+          metalness={0.0}
+        />
+      </mesh>
+
+      {/* Top black cap */}
+      <mesh
+        position={[0, 0.95 + 0.15, 0]} // 0.15 = height/2
+        rotation={[-Math.PI / 2, 0, 0]}
+        castShadow
+        receiveShadow
+      >
+        <circleGeometry args={[0.1, 128]} />
+        <meshStandardMaterial color="#000000" roughness={0.3} metalness={0} side={THREE.DoubleSide} />
+      </mesh>
 
       <directionalLight
         ref={directionalLightRef}

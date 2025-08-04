@@ -22,12 +22,17 @@ function Simulator() {
 
     const [useWebSocket, setUseWebSocket] = useState(false);
     const [mode, setMode] = useState('init');
+    const [loading, setLoading] = useState(true)
 
   return (
-    <div className="relative w-full h-full">
-
+    <div className="relative w-full h-full rounded-4xl bg-white/50">
+        {loading && (
+            <div className="absolute inset-0 flex items-center justify-center z-50">
+                <span className="loading loading-spinner loading-xl"></span>
+            </div>
+        )}
         <Canvas
-            className="w-fit h-fit"
+            className="w-fit h-fit rounded-4xl"
             shadows
             dpr={window.devicePixelRatio}
             gl={{
@@ -45,6 +50,7 @@ function Simulator() {
                 setCylinderSettings={setCylinderSettings}
                 mode={mode}
                 setMode={setMode}
+                setLoading={setLoading}
             />
 
         </Canvas>
