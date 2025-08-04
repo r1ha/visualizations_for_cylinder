@@ -83,13 +83,16 @@ export const Scene = ({  canvasRef, cylinderSettings, setCylinderSettings, mode,
     }
   })
 
+  let height = 0.3;
+  let radius = 0.1;
+
   return (
     <>
       <primitive object={scene} />
 
       <mesh
         ref={cylinderRef}
-        position={[0, 0.95, 0]}
+        position={[0, 0.8 + height/2, 0]}
         castShadow
         receiveShadow
       >
@@ -97,9 +100,9 @@ export const Scene = ({  canvasRef, cylinderSettings, setCylinderSettings, mode,
         {/* Cylinder geometry with dynamic texture */}
         <cylinderGeometry
           args={[
-            0.1, // radiusTop
-            0.1, // radiusBottom
-            0.3, // height
+            radius, // radiusTop
+            radius, // radiusBottom
+            height, // height
             128, // radialSegments (smooth)
             1,   // heightSegments
             true // openEnded (no caps)
