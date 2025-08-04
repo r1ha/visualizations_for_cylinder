@@ -41,7 +41,6 @@ export const Scene = ({  canvasRef, cylinderSettings, setCylinderSettings, mode 
             radius: size.x / 2
           })
 
-          console.log("Cylinder settings provided")
         }
 
         if (obj.name === 'Cylinder_Top') {

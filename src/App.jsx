@@ -1,12 +1,12 @@
 import './App.css'
-import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { HashRouter, Routes, Route } from "react-router-dom"
 import Simulator from './pages/Simulator'
 import Notes from './pages/Notes'
 
 function App() {
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route
           path="/"
@@ -17,7 +17,7 @@ function App() {
         />
         <Route path="/notes" element={<Notes />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   )
 }
 
