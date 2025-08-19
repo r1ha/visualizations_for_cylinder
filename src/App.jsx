@@ -1,6 +1,7 @@
 import './App.css'
 import { HashRouter, Routes, Route } from "react-router-dom"
 import Simulator from './pages/Simulator'
+import Test from './pages/Test'
 
 function App() {
 
@@ -14,6 +15,7 @@ function App() {
             />
           }
         />
+        <Route path="/test" element={<Test/>} />
       </Routes>
     </HashRouter>
   )
